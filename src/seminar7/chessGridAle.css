@@ -1,0 +1,31 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #fff;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* TABLA DE ȘAH */
+.chessboard {
+  display: grid;
+  grid-template-columns: repeat(8, 80px);
+  grid-template-rows: repeat(8, 80px);
+  border: 6px solid black;
+}
+
+/* Alb – pătratele impare */
+.chessboard div:nth-child(odd) {
+  background-color: white;
+}
+
+/* Negru – pătratele pare */
+.chessboard div:nth-child(even) {
+  background-color: black;
+}
