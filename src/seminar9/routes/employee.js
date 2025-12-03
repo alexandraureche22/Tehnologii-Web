@@ -6,43 +6,66 @@ const router = require("express").Router();
 router
   .route("/employees")
   .get(async (req, res) => {
-    // get all
+    // GET: Listare, Filtrare după nume ȘI Sortare
     try {
-      const employees = await Employee.findAll({});
+      let where = {};
+      let order = [];
+      const { name, orderBy } = req.query; // Extrage parametrii 'name' și 'orderBy'
+
+      // 1. LOGICA DE FILTRARE (după nume)
+      if (name) {
+        where.firstName = {
+          [Op.like]: `%${name}%`,
+        };
+      }
+
+      // 2. LOGICA DE SORTARE (după câmpul specificat în orderBy)
+      if (orderBy) {
+        // Listează câmpurile permise pentru sortare pentru a preveni atacuri SQL Injection
+        const allowedFields = ["firstName", "lastName", "birthYear", "salary"];
+
+        if (allowedFields.includes(orderBy)) {
+          // Aplică sortarea: [NumeCâmp, Direcție]. Folosim 'ASC' (Ascendent) ca default.
+          order.push([orderBy, "ASC"]);
+        }
+      }
+
+      const employees = await Employee.findAll({
+        where: where,
+        order: order, // Aplică sortarea
+      });
+
       return res.status(200).json(employees);
     } catch (err) {
       return res.status(500).json(err);
     }
   })
   .post(async (req, res) => {
-    // create
-    // console.log("req.body :>> ", req.body);
+    // POST: Creare înregistrare nouă (va declanșa validările din models/employee.js)
     try {
       const newEmployee = await Employee.create(req.body);
       return res.status(200).json(newEmployee);
     } catch (err) {
-      // De obicei, erorile de validare (SequelizeValidationError) sunt prinse aici
+      // Prinde erorile, inclusiv cele de validare
       return res.status(500).json(err);
     }
   });
 
-// NOU ENDPOINT: ȘTERGEREA UNEI ÎNREGISTRĂRI DUPĂ ID
-
 router.route("/employees/:id").delete(async (req, res) => {
+  // DELETE: Ștergere înregistrare după ID
   try {
-    const { id } = req.params; // Extrage ID-ul din parametrii rutei
+    const { id } = req.params;
 
-    // Folosește metoda destroy() a Sequelize pentru a șterge
     const deletedRowCount = await Employee.destroy({
       where: { id: id },
     });
 
     if (deletedRowCount === 0) {
-      // Nici o înregistrare nu a fost găsită/ștersă
+      // Angajatul nu a fost găsit
       return res.status(404).json({ message: "Angajatul nu a fost găsit." });
     }
 
-    // Răspuns standard pentru o ștergere reușită fără conținut de returnat
+    // răspuns standard pentru ștergere reușită
     return res.status(204).send();
   } catch (err) {
     return res.status(500).json(err);
