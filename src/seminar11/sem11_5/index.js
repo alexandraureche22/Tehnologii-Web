@@ -1,7 +1,7 @@
 // Express Initialisation
 const express = require("express");
 const app = express();
-const port = process.env.PORT || 3000; // <-- Ascultă pe PORT-ul Heroku
+const port = process.env.PORT || 3000; // <-- Ascultă pe PORT-ul Render
 
 // Sequelize Initialisation
 const sequelize = require("./sequelize");
